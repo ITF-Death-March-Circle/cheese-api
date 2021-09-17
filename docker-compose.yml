@@ -1,0 +1,12 @@
+version: '3.9'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: ./docker/app/Dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./tmp/images/:/tmp/images/
+    tty: true
