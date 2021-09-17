@@ -1,5 +1,7 @@
 name: Deploy to Amazon ECS
 
+runs-on: self-hosted
+
 on:
   push:
     branches:
@@ -20,7 +22,6 @@ defaults:
     shell: bash
 
 jobs:
-  runs-on: self-hosted
   deploy_api:
     name: Deploy API
     runs-on: ubuntu-latest
