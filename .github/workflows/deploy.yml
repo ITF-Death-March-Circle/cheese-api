@@ -51,7 +51,7 @@ jobs:
           # Docker コンテナを作成し
           # ECR にプッシュして
           # ECS にデプロイできるようにする。
-          docker build -t $ECR_REGISTRY/$API_ECR_REPOSITORY:$IMAGE_TAG ./docker/app/
+          docker build -t $ECR_REGISTRY/$API_ECR_REPOSITORY:$IMAGE_TAG -f docker/app/Dockerfile .
           docker push $ECR_REGISTRY/$API_ECR_REPOSITORY:$IMAGE_TAG
           echo "::set-output name=image::$ECR_REGISTRY/$API_ECR_REPOSITORY:$IMAGE_TAG"
       - name: Fill in the new image ID in the Amazon ECS task definition
