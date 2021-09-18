@@ -41,5 +41,8 @@ func main() {
 
 		c.String(http.StatusOK, fmt.Sprintf("Saved file to '%s'.", outputFilepath))
 	})
+	router.GET("/download",func(c*gin.Context){
+		
+	})
 	router.Run(":80")
 }

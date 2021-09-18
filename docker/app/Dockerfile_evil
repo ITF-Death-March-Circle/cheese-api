@@ -1,0 +1,59 @@
+FROM golang:latest as builder-go
+WORKDIR /workdir
+COPY src .
+RUN go mod tidy
+# Set Environment Variable
+ENV CGO_ENABLED=0
+ENV GOOS=linux
+ENV GOARCH=amd64
+# Build
+RUN go build -o app
+
+FROM debian:bullseye as builder-opencv
+ENV TZ=Asia/Tokyo
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+RUN apt update && apt install -y \ 
+    g++ build-essential wget git unzip cmake make libeigen3-dev libtbb-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev \
+    libjpeg-dev libpng++-dev libtiff-dev libopenexr-dev libwebp-dev \
+    libhdf5-dev libopenblas-dev liblapacke-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Download and unpack sources
+RUN wget -O opencv.zip https://github.com/opencv/opencv/archive/master.zip && wget -O opencv_contrib.zip https://github.com/opencv/opencv_contrib/archive/master.zip && unzip opencv.zip && unzip opencv_contrib.zip && mkdir -p build && cd build && cmake -DOPENCV_EXTRA_MODULES_PATH=../opencv_contrib-master/modules ../opencv-master && cmake --build . && make -j4
+
+FROM debian:bullseye as builder-build-cv
+
+ENV TZ=Asia/Tokyo
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+RUN apt update && apt install -y \ 
+    g++ build-essential wget git unzip cmake make libeigen3-dev libtbb-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev \
+    libjpeg-dev libpng++-dev libtiff-dev libopenexr-dev libwebp-dev \
+    libhdf5-dev libopenblas-dev liblapacke-dev \
+    && rm -rf /var/lib/apt/lists/*
+WORKDIR /
+RUN wget -O opencv.zip https://github.com/opencv/opencv/archive/master.zip && wget -O opencv_contrib.zip https://github.com/opencv/opencv_contrib/archive/master.zip
+RUN unzip opencv.zip && unzip opencv_contrib.zip && rm -rf *.zip
+
+WORKDIR /build
+COPY --from=builder-opencv /build/ .
+
+RUN make install
+
+FROM builder-build-cv as builder-cv
+WORKDIR /cheese
+COPY *.cpp .
+COPY *.hpp .
+COPY CMakeLists.txt .
+RUN cmake . && make
+
+FROM golang:bullseye
+# ARG SHA256_KEY
+# ENV SHA256_KEY=$SHA256_KEY
+# RUN apk add --no-cache ca-certificates
+
+COPY --from=builder-go /workdir/app /app
+COPY --from=builder-cv /cheese/DisplayImage .
+COPY --from=builder-cv /usr/local/lib /usr/local/lib
+# テスト
+RUN ./DisplayImage
+ENTRYPOINT ["/app"]
