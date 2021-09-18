@@ -10,6 +10,12 @@ services:
     volumes:
       - ./tmp/images/:/tmp/images/
     tty: true
+    depends_on:
+      - redis
+    environment:
+      - "REDIS_PATH=redis:6379"
+      - "PORT=80"
+
   redis:
     image: redis
     ports:
