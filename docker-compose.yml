@@ -13,8 +13,7 @@ services:
     depends_on:
       - redis
     environment:
-      - "REDIS_PATH=redis:6379"
-      - "PORT=80"
+      - "REDIS_HOST=redis:6379"
 
   redis:
     image: redis
