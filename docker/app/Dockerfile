@@ -14,5 +14,6 @@ FROM alpine
 RUN apk add --no-cache ca-certificates
 COPY --from=builder /workdir/app /app
 COPY --from=builder /workdir/public /public
+RUN mkdir -p /tmp/images
 
 ENTRYPOINT ["/app"]

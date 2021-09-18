@@ -10,3 +10,8 @@ services:
     volumes:
       - ./tmp/images/:/tmp/images/
     tty: true
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    command: redis-server
