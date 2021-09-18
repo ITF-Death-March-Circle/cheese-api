@@ -1,3 +1,10 @@
+FROM notchman/opencv:latest as builder-cv
+WORKDIR /cheese
+COPY *.cpp .
+COPY *.hpp .
+COPY CMakeLists.txt .
+RUN cmake . && make
+
 FROM golang:latest as builder
 WORKDIR /workdir
 COPY src .
@@ -9,11 +16,10 @@ ENV GOARCH=amd64
 # Build
 RUN go build -o app
 
-# Runtime Container
-FROM alpine
-RUN apk add --no-cache ca-certificates
+FROM golang:bullseye
 COPY --from=builder /workdir/app /app
-COPY --from=builder /workdir/public /public
-RUN mkdir -p /tmp/images
-
+COPY --from=builder-cv /cheese/DisplayImage .
+COPY --from=builder-cv /usr/local/lib /usr/local/lib
+# テスト
+RUN ./DisplayImage
 ENTRYPOINT ["/app"]

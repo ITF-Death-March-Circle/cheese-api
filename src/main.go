@@ -17,7 +17,6 @@ func main() {
 	router := gin.Default()
 	// Set a lower memory limit for multipart forms (default is 32 MiB)
 	router.MaxMultipartMemory = 8 << 20 // 8 MiB
-	router.Static("/", "./public")
 	router.POST("/upload", func(c *gin.Context) {
 		// フォームデータからファイルを読み込む
 		file, err := c.FormFile("file")
@@ -70,6 +69,9 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{
 			"base64": fmt.Sprintf("%s", base64Encoding),
 		})
+	})
+	router.GET("/download",func(c*gin.Context){
+		
 	})
 	router.Run(":80")
 }
