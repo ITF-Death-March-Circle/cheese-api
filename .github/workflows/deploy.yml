@@ -1,71 +1,42 @@
-name: Deploy to Amazon ECS
+name: Azure_Linux_Container_Workflow
 
 on:
   push:
     branches:
       - main
-
-env:
-  AWS_REGION: ap-northeast-1                  # これをお好みの AWS リージョンに設定する (us-west-1 など)
-  API_ECR_REPOSITORY: cheese_api           # これを Amazon ECR リポジトリ名に設定する
-  ECS_SERVICE: cheese-service             # これを Amazon ECS サービス名に設定する
-  ECS_CLUSTER: cheese-cluster             # これを Amazon ECS クラスタ名に設定する
-  ECS_TASK_DEFINITION: task-definition.json   # これを Amazon ECS タスク定義へのパスに設定する
-                                              # ファイル (.aws/task-definition.json など)
-  API_CONTAINER_NAME: cheese-container        # これをタスク定義の containerDefinitions セクションで
-                                              # コンテナの名前に設定する
-
-defaults:
-  run:
-    shell: bash
+  workflow_dispatch:
 
 jobs:
-  deploy_api:
-    name: Deploy API
-    runs-on: ubuntu-latest
-    permissions:
-      packages: write
-      contents: read
+    build-and-deploy:
+        runs-on: ubuntu-latest
+        steps:
+        # checkout the repo
+        - name: 'Checkout GitHub Action'
+          uses: actions/checkout@main
+          
+        - name: 'Login via Azure CLI'
+          uses: azure/login@v1
+          with:
+            creds: ${{ secrets.AZURE_CREDENTIALS }}
+        
+        - name: 'Build and push image'
+          uses: azure/docker-login@v1
+          with:
+            login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+            username: ${{ secrets.REGISTRY_USERNAME }}
+            password: ${{ secrets.REGISTRY_PASSWORD }}
+        - run: |
+            docker build . -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/cheese-api:${{ github.sha }}
+            docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/cheese-api:${{ github.sha }}
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
-
-      - name: Build, tag, and push image to Amazon ECR
-        id: build-image
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG: ${{ github.sha }}
-        run: |
-          # Docker コンテナを作成し
-          # ECR にプッシュして
-          # ECS にデプロイできるようにする。
-          docker build -t $ECR_REGISTRY/$API_ECR_REPOSITORY:$IMAGE_TAG -f docker/app/Dockerfile .
-          docker push $ECR_REGISTRY/$API_ECR_REPOSITORY:$IMAGE_TAG
-          echo "::set-output name=image::$ECR_REGISTRY/$API_ECR_REPOSITORY:$IMAGE_TAG"
-      - name: Fill in the new image ID in the Amazon ECS task definition
-        id: task-def
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        with:
-          task-definition: ${{ env.ECS_TASK_DEFINITION }}
-          container-name: ${{ env.API_CONTAINER_NAME }}
-          image: ${{ steps.build-image.outputs.image }}
-
-      - name: Deploy Amazon ECS task definition
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-        with:
-          task-definition: ${{ steps.task-def.outputs.task-definition }}
-          service: ${{ env.ECS_SERVICE }}
-          cluster: ${{ env.ECS_CLUSTER }}
-          wait-for-service-stability: true
+        - name: 'Deploy to Azure Container Instances'
+          uses: 'azure/aci-deploy@v1'
+          with:
+            resource-group: ${{ secrets.RESOURCE_GROUP }}
+            dns-name-label: ${{ secrets.RESOURCE_GROUP }}${{ github.run_number }}
+            image: ${{ secrets.REGISTRY_LOGIN_SERVER }}/cheese-api:${{ github.sha }}
+            registry-login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+            registry-username: ${{ secrets.REGISTRY_USERNAME }}
+            registry-password: ${{ secrets.REGISTRY_PASSWORD }}
+            name: aci-cheese-api
+            location: 'japan east'
