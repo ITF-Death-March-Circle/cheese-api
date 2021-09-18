@@ -13,7 +13,7 @@ const Nil = redis.Nil
 func New(dsn string) (*redis.Client, error) {
 	client := redis.NewClient(&redis.Options{
 		Addr:     dsn,
-		Password: "",
+		Password: os.Getenv("REDIS_AUTH"),
 		DB:       0,
 	})
 	if err := client.Ping().Err(); err != nil {
