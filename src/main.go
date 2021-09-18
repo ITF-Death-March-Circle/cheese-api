@@ -2,8 +2,11 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"path/filepath"
+
+	"main/redis"
 
 	"github.com/gin-gonic/gin"
 )
@@ -22,12 +25,21 @@ func main() {
 		}
 
 		filename := filepath.Base(file.Filename)
-		if err := c.SaveUploadedFile(file, "/tmp/images/"+filename); err != nil {
+		filepath := "/tmp/images/"+filename
+		if err := c.SaveUploadedFile(file, filepath); err != nil {
 			c.String(http.StatusBadRequest, fmt.Sprintf("upload file err: %s", err.Error()))
 			return
 		}
 
-		c.String(http.StatusOK, fmt.Sprintf("File %s uploaded successfully.", file.Filename))
+		redis.SetValue("filepath", filepath)
+		outputFilepath, err := redis.GetValue("filepath")
+		if err != nil {
+			c.String(http.StatusBadGateway, fmt.Sprintf("get form err: %s", err.Error()))
+			return
+		}
+		log.Print(outputFilepath)
+
+		c.String(http.StatusOK, fmt.Sprintf("Saved file to '%s'.", outputFilepath))
 	})
 	router.Run(":80")
 }
