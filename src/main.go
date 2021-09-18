@@ -2,14 +2,16 @@ package main
 
 import (
 	"fmt"
-	"log"
+	"io/ioutil"
 	"net/http"
 	"path/filepath"
 
+	"main/base64"
 	"main/redis"
 
 	"github.com/gin-gonic/gin"
 )
+
 
 func main() {
 	router := gin.Default()
@@ -17,29 +19,57 @@ func main() {
 	router.MaxMultipartMemory = 8 << 20 // 8 MiB
 	router.Static("/", "./public")
 	router.POST("/upload", func(c *gin.Context) {
-		// Source
+		// フォームデータからファイルを読み込む
 		file, err := c.FormFile("file")
 		if err != nil {
-			c.String(http.StatusBadRequest, fmt.Sprintf("get form err: %s", err.Error()))
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": fmt.Sprintf("get form err: %s", err.Error()),
+			})
 			return
 		}
 
+		// ファイルを保存する
 		filename := filepath.Base(file.Filename)
 		filepath := "/tmp/images/"+filename
 		if err := c.SaveUploadedFile(file, filepath); err != nil {
-			c.String(http.StatusBadRequest, fmt.Sprintf("upload file err: %s", err.Error()))
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": fmt.Sprintf("upload file err: %s", err.Error()),
+			})
 			return
 		}
 
-		redis.SetValue("filepath", filepath)
+		// 保存パスをRedisに保存
+		err = redis.SetValue("filepath", filepath)
+		if err != nil {
+			c.JSON(http.StatusBadGateway, gin.H{
+				"error": fmt.Sprintf("get redis err: %s", err.Error()),
+			})
+			return
+		}
+
+		// 保存パスをRedisから取得
 		outputFilepath, err := redis.GetValue("filepath")
 		if err != nil {
-			c.String(http.StatusBadGateway, fmt.Sprintf("get form err: %s", err.Error()))
+			c.JSON(http.StatusBadGateway, gin.H{
+				"error": fmt.Sprintf("get redis err: %s", err.Error()),
+			})
 			return
 		}
-		log.Print(outputFilepath)
 
-		c.String(http.StatusOK, fmt.Sprintf("Saved file to '%s'.", outputFilepath))
+		// 保存パスからファイルを読込
+		bytes, err := ioutil.ReadFile(outputFilepath)
+		if err != nil {
+			c.JSON(http.StatusBadGateway, gin.H{
+				"error": fmt.Sprintf("get form err: %s", err.Error()),
+			})
+			return
+		}
+
+		// ファイルをbase64に変換してその結果をjsonとして返却
+		base64Encoding := base64.Encode(bytes)
+		c.JSON(http.StatusOK, gin.H{
+			"base64": fmt.Sprintf("%s", base64Encoding),
+		})
 	})
 	router.GET("/download",func(c*gin.Context){
 		
