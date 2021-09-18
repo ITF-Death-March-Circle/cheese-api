@@ -1,7 +1,6 @@
 package redis
 
 import (
-	"log"
 	"os"
 
 	"github.com/go-redis/redis"
@@ -27,7 +26,6 @@ func SetValue(savePath string, value string) error {
 	redisPath := os.Getenv("REDIS_HOST")
 	client, err := New(redisPath)
 	if err != nil {
-		log.Println(err)
 		return err
 	}
 	defer client.Close()
@@ -41,10 +39,8 @@ func SetValue(savePath string, value string) error {
 
 func GetValue(savePath string) (string, error) {
 	redisPath := os.Getenv("REDIS_HOST")
-	log.Println(redisPath)
 	client, err := New(redisPath)
 	if err != nil {
-		log.Println(err)
 		return "error", err
 	}
 	defer client.Close()
