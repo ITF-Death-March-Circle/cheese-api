@@ -4,7 +4,6 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"path/filepath"
 
@@ -14,7 +13,20 @@ import (
 )
 
 func toBase64(b []byte) string {
-	return base64.StdEncoding.EncodeToString(b)
+	var base64EncodingPrefix string
+	// Determine the content type of the image file
+	mimeType := http.DetectContentType(b)
+	// Prepend the appropriate URI scheme header depending
+	// on the MIME type
+	switch mimeType {
+	case "image/jpeg":
+		base64EncodingPrefix = "data:image/jpeg;base64,"
+	case "image/jpg":
+		base64EncodingPrefix = "data:image/jpeg;base64,"
+	case "image/png":
+		base64EncodingPrefix = "data:image/png;base64,"
+	}
+	return base64EncodingPrefix + base64.StdEncoding.EncodeToString(b)
 }
 
 func main() {
@@ -26,52 +38,44 @@ func main() {
 		// Source
 		file, err := c.FormFile("file")
 		if err != nil {
-			c.String(http.StatusBadRequest, fmt.Sprintf("get form err: %s", err.Error()))
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": fmt.Sprintf("get form err: %s", err.Error()),
+			})
 			return
 		}
 
 		filename := filepath.Base(file.Filename)
 		filepath := "/tmp/images/"+filename
 		if err := c.SaveUploadedFile(file, filepath); err != nil {
-			c.String(http.StatusBadRequest, fmt.Sprintf("upload file err: %s", err.Error()))
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error":  fmt.Sprintf("upload file err: %s", err.Error()),
+			})
 			return
 		}
 
 		redis.SetValue("filepath", filepath)
 		outputFilepath, err := redis.GetValue("filepath")
 		if err != nil {
-			c.String(http.StatusBadGateway, fmt.Sprintf("get form err: %s", err.Error()))
+			c.JSON(http.StatusBadGateway, gin.H{
+				"error":  fmt.Sprintf("get form err: %s", err.Error()),
+			})
 			return
 		}
-		log.Print(outputFilepath)
 
 		// Read the entire file into a byte slice
-	bytes, err := ioutil.ReadFile(outputFilepath)
-	if err != nil {
-		log.Fatal(err)
-	}
+		bytes, err := ioutil.ReadFile(outputFilepath)
+		if err != nil {
+			c.JSON(http.StatusBadGateway, gin.H{
+				"error": "get form err:" + err.Error(),
+			})
+			return
+		}
 
-	var base64Encoding string
-
-	// Determine the content type of the image file
-	mimeType := http.DetectContentType(bytes)
-
-	// Prepend the appropriate URI scheme header depending
-	// on the MIME type
-	switch mimeType {
-	case "image/jpeg":
-		base64Encoding += "data:image/jpeg;base64,"
-	case "image/png":
-		base64Encoding += "data:image/png;base64,"
-	}
-
-	// Append the base64 encoded output
-	base64Encoding += toBase64(bytes)
-
-	// Print the full base64 representation of the image
-	fmt.Println(base64Encoding)
-
-		c.String(http.StatusOK, fmt.Sprintf("Saved file to '%s'. base64: %s", outputFilepath, base64Encoding))
+		// Append the base64 encoded output
+		base64Encoding := toBase64(bytes)
+		c.JSON(http.StatusOK, gin.H{
+			"base64": base64Encoding,
+		})
 	})
 	router.Run(":80")
 }
