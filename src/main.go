@@ -22,6 +22,30 @@ func main() {
 	router := gin.Default()
 	// Set a lower memory limit for multipart forms (default is 32 MiB)
 	router.MaxMultipartMemory = 8 << 20 // 8 MiB
+	router.Use(cors.New(cors.Config{
+		// 許可したいHTTPメソッドの一覧
+		AllowMethods: []string{
+			"POST",
+			"GET",
+			"OPTIONS",
+			"PUT",
+			"DELETE",
+		},
+		// 許可したいHTTPリクエストヘッダの一覧
+		AllowHeaders: []string{
+			"Access-Control-Allow-Headers",
+			"Content-Type",
+			"Content-Length",
+			"Accept-Encoding",
+			"X-CSRF-Token",
+			"Authorization",
+		},
+		// 許可したいアクセス元の一覧
+		AllowOrigins: []string{
+			"*",
+		},
+		MaxAge: 24 * time.Hour,
+	}))
 	router.POST("/upload", func(c *gin.Context) {
 		// フォームデータからファイルを読み込む
 		file, err := c.FormFile("file")
@@ -86,7 +110,7 @@ func main() {
 
 		// opencv製画像処理を実行
 		output, err := exec.Command("bash","-c","/DisplayImage").CombinedOutput()
-    log.Printf("opencv output:\n%s :Error:\n%v\n", output, err)
+		log.Printf("opencv output:\n%s :Error:\n%v\n", output, err)
 		if err != nil {
 			c.JSON(http.StatusBadGateway, gin.H{
 				"error": fmt.Sprintf("exec opencv err: %s", err.Error()),
