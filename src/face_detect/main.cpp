@@ -279,7 +279,7 @@ int main()
 		}
 		// cv::imshow("tmp", extract_img);
 		// int wait = cv::waitKey(0);
-		if (500.0 * index_h + (extract_img.rows / 5) >= size_h)
+		if (500.0 * index_w + (extract_img.cols / 6 >= size_w)
 		{
 			++index_h;
 			index_w = 0;
