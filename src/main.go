@@ -16,7 +16,7 @@ import (
 )
 
 const SAVE_DIR string = "/cheese/images/"
-const RESULT_IMAGE string = "/cheese/result.png"
+const RESULT_IMAGE string = "/cheese/result.jpg"
 
 func main() {
 	router := gin.Default()
