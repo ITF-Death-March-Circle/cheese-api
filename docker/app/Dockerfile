@@ -23,6 +23,6 @@ COPY --from=builder /workdir/app /app
 COPY --from=builder-cv /cheese/DisplayImage ./
 COPY --from=builder-cv /usr/local/lib /usr/local/lib
 # テスト
-RUN mkdir /cheese/images -p
+# RUN mkdir /cheese/images -p
 # RUN ./DisplayImage
 ENTRYPOINT ["/app"]
