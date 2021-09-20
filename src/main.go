@@ -98,6 +98,7 @@ func main() {
 		base64Encoding := base64.Encode(bytes)
 		c.JSON(http.StatusOK, gin.H{
 			"base64": fmt.Sprintf("%s", base64Encoding),
+			"output": fmt.Sprintf("%s", output),
 		})
 	})
 	router.GET("/download",func(c*gin.Context){
