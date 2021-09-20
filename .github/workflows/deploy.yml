@@ -1,4 +1,4 @@
-name: Linux Container Node Workflow
+name: Azure_Linux_Container_Workflow
 
 on:
   push:
@@ -7,22 +7,37 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+    build-and-deploy:
+        runs-on: ubuntu-latest
+        steps:
+        # checkout the repo
+        - name: 'Checkout GitHub Action'
+          uses: actions/checkout@main
+          
+        - name: 'Login via Azure CLI'
+          uses: azure/login@v1
+          with:
+            creds: ${{ secrets.AZURE_CREDENTIALS }}
+        
+        - name: 'Build and push image'
+          uses: azure/docker-login@v1
+          with:
+            login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+            username: ${{ secrets.REGISTRY_USERNAME }}
+            password: ${{ secrets.REGISTRY_PASSWORD }}
+        - run: |
+            docker build . -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/cheese-api:${{ github.sha }} -f docker/app/Dockerfile
+            docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/cheese-api:${{ github.sha }}
 
-    steps:
-    - uses: actions/checkout@v2
-    - uses: azure/docker-login@v1
-      with:
-        login-server: cheeseapi.azurecr.io
-        username: ${{ secrets.REGISTRY_USERNAME }}
-        password: ${{ secrets.REGISTRY_PASSWORD }}
-    - run: |
-        docker build . -t cheeseapi.azurecr.io/cheeseapi:${{ github.sha }}
-        docker push cheeseapi.azurecr.io/cheeseapi:${{ github.sha }}
-
-    - uses: azure/webapps-deploy@v2
-      with:
-        app-name: 'cheeseapi'
-        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-        images: 'cheeseapi.azurecr.io/cheeseapi:${{ github.sha }}'
+        - name: 'Deploy to Azure Container Instances'
+          uses: 'azure/aci-deploy@v1'
+          with:
+            resource-group: ${{ secrets.RESOURCE_GROUP }}
+            dns-name-label: ${{ secrets.RESOURCE_GROUP }}
+            image: ${{ secrets.REGISTRY_LOGIN_SERVER }}/cheese-api:${{ github.sha }}
+            registry-login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+            registry-username: ${{ secrets.REGISTRY_USERNAME }}
+            registry-password: ${{ secrets.REGISTRY_PASSWORD }}
+            name: aci-cheese-api
+            secure-environment-variables: REDIS_HOST=${{ secrets.REDIS_HOST }} REDIS_AUTH=${{ secrets.REDIS_AUTH }}
+            location: 'japan east'
