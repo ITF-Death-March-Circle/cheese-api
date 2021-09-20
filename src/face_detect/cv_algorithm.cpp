@@ -28,9 +28,9 @@ void extractFaceImage(std::string filepath, cv::UMat& clip_img) {
 	cv::Mat _image = cv::imread(filepath);
 	//cv::VideoCapture cap(0);
 	cv::CascadeClassifier cascade;
-	//cascade.load("haarcascade_frontalface_alt.xml");
-	//cascade.load("haarcascade_profileface.xml");
-	cascade.load("haarcascade_frontalface_alt2.xml");
+	//cascade.load("/haarcascade_frontalface_alt.xml");
+	//cascade.load("/haarcascade_profileface.xml");
+	cascade.load("/haarcascade_frontalface_alt2.xml");
 	std::vector<cv::Rect> faces;
 	cv::UMat dst;
 	//cv::UMat clip_img;

@@ -251,7 +251,7 @@ int main()
 	std::string filename;
 	cv::UMat result_img;
 
-	cv::Mat template_img = cv::imread("template.JPG");
+	cv::Mat template_img = cv::imread("/template.JPG");
 	template_img.copyTo(result_img);
 	int offset_width = 0;
 	int offset_height = 0;
