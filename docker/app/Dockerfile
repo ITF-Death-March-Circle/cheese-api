@@ -4,7 +4,6 @@ WORKDIR /cheese
 COPY /src/face_detect/ ./
 RUN cmake . && make
 RUN mkdir out && mv DisplayImage ./out/ && mv *.JPG out/ && mv *.xml out/
-
 FROM golang:latest as builder
 WORKDIR /workdir
 COPY src ./
@@ -17,7 +16,12 @@ ENV GOARCH=amd64
 RUN go build -o app
 
 FROM golang:bullseye
-
+WORKDIR /
+RUN apt update && apt install -y \ 
+    g++ build-essential libeigen3-dev libtbb-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev \
+    libjpeg-dev libpng++-dev libtiff-dev libopenexr-dev libwebp-dev \
+    libhdf5-dev libopenblas-dev liblapacke-dev \
+    && rm -rf /var/lib/apt/lists/*
 COPY --from=builder /workdir/app /app
 COPY --from=builder-cv /cheese/out/ /
 
@@ -27,6 +31,7 @@ COPY --from=builder-cv /cheese/out/ /
 COPY --from=builder-cv /usr/local/lib /usr/local/lib
 
 # テスト
-# RUN mkdir /cheese/images -p
+RUN mkdir /cheese/images -p
 # RUN ./DisplayImage
+
 ENTRYPOINT ["/app"]
