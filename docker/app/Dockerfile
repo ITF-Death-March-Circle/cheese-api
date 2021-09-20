@@ -1,7 +1,9 @@
 FROM notchman/opencv:latest as builder-cv
 WORKDIR /cheese
-COPY *.cpp ./
-COPY *.hpp ./
+COPY /src/face_detect/*.cpp .
+COPY /src/face_detect/*.hpp .
+COPY /src/face_detect/*.xml .
+
 COPY CMakeLists.txt .
 RUN cmake . && make
 
@@ -18,8 +20,9 @@ RUN go build -o app
 
 FROM golang:bullseye
 COPY --from=builder /workdir/app /app
-COPY --from=builder-cv /cheese/DisplayImage ./
+COPY --from=builder-cv /cheese/DisplayImage /DisplayImage
 COPY --from=builder-cv /usr/local/lib /usr/local/lib
 # テスト
-RUN ./DisplayImage
+# RUN mkdir /cheese/images -p
+# RUN ./DisplayImage
 ENTRYPOINT ["/app"]
