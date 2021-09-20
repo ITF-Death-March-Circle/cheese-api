@@ -3,8 +3,10 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 
 	"main/base64"
@@ -81,6 +83,10 @@ func main() {
 			})
 			return
 		}
+
+		// opencv製画像処理を実行
+		output, err := exec.Command("ls").CombinedOutput()
+    log.Printf("opencv output:\n%s :Error:\n%v\n", output, err)
 
 		// ファイルをbase64に変換してその結果をjsonとして返却
 		base64Encoding := base64.Encode(bytes)

@@ -31,7 +31,7 @@ COPY --from=builder-cv /cheese/out/ /
 COPY --from=builder-cv /usr/local/lib /usr/local/lib
 
 # テスト
-RUN mkdir /cheese/images -p
+RUN mkdir /cheese
 # RUN ./DisplayImage
 
 ENTRYPOINT ["/app"]
