@@ -24,41 +24,50 @@ constexpr int  V_MIN = 60;
 #define MAX_BKCOLOR cv::Scalar(180, 255, 40)
 
 
-void extractFaceImage(std::string filepath, cv::UMat &clip_img) {
+void extractFaceImage(std::string filepath, cv::UMat& clip_img) {
 	cv::Mat _image = cv::imread(filepath);
 	//cv::VideoCapture cap(0);
-	cv::CascadeClassifier cascade; //�J�X�P�[�h���ފ�i�[�ꏊ
-	cascade.load("haarcascade_frontalface_alt.xml"); //���ʊ��񂪓����Ă���J�X�P�[�h
-	std::vector<cv::Rect> faces; //�֊s�����i�[�ꏊ
+	cv::CascadeClassifier cascade;
+	//cascade.load("haarcascade_frontalface_alt.xml");
+	//cascade.load("haarcascade_profileface.xml");
+	cascade.load("haarcascade_frontalface_alt2.xml");
+	std::vector<cv::Rect> faces;
 	cv::UMat dst;
 	//cv::UMat clip_img;
 	cv::UMat origin_dst;
 	_image.copyTo(origin_dst);
+	//_image.copyTo(dst);
 	cv::convertScaleAbs(origin_dst, dst, 1.2, 80);
-
+	//cv::imshow("adjusted", dst);
 	//cv::imshow("diff", frame - before_frame);
-	cascade.detectMultiScale(dst, faces, 1.1, 3, 0, cv::Size(50, 50));
+	cascade.detectMultiScale(dst, faces, 1.05, 1, 0, cv::Size(300, 300));
 	if (faces.size() == 0)return;
 	cv::UMat work_src;
 
 	cv::GaussianBlur(dst, dst, cv::Size(5, 5), 0);
 	std::cout << faces.size() << std::endl;
-	for (int i = 0; i < faces.size(); i++) //���o������̌�"faces.size()"�����[�v���s��
+	int mount = 0;
+	for (int i = 0; i < faces.size(); i++)
 	{
-		//�Z�[�t�N���b�s���O
 
 		int w_start = (faces[i].x - offset_width) > 0 ? (faces[i].x - offset_width) : 0;
 		int h_start = (faces[i].y - offset_height) > 0 ? (faces[i].y - offset_height) : 0;
 		int w_end = (faces[i].x + faces[i].width + offset_width) < dst.cols ? faces[i].x + faces[i].width + offset_width : dst.cols;
 		int h_end = (faces[i].y + faces[i].height + offset_height) < dst.rows ? faces[i].y + faces[i].height + offset_height : dst.rows;
-		//rectangle(frame, cv::Point(faces[i].x, faces[i].y), cv::Point(faces[i].x + faces[i].width, faces[i].y + faces[i].height), cv::Scalar(0, 0, 255), 3); //���o�������ԐF��`�ň͂�
+
+		int tmp_mount = std::abs(w_end - w_start) + std::abs(h_end - h_start);
+		if (tmp_mount >= mount) {
+			mount = tmp_mount;
+
+			cv::UMat roi_img(origin_dst, cv::Rect(cv::Point(w_start, h_start), cv::Point(w_end, h_end)));
+			//cv::imshow("clip" + std::to_string(i), roi_img);
+			roi_img.copyTo(clip_img);
+			roi_img.copyTo(work_src);
+		}
+		//rectangle(frame, cv::Point(faces[i].x, faces[i].y), cv::Point(faces[i].x + faces[i].width, faces[i].y + faces[i].height), cv::Scalar(0, 0, 255), 3); /
 		//rectangle(frame, cv::Point(w_start, h_start), cv::Point(w_end, h_end), cv::Scalar(0, 0, 255), 3); //���o�������ԐF��`�ň͂�
 
-		//�N���b�s���O�摜�̐���
-		cv::UMat roi_img(origin_dst, cv::Rect(cv::Point(w_start, h_start), cv::Point(w_end, h_end)));
-		//cv::imshow("clip" + std::to_string(i), roi_img);
-		roi_img.copyTo(clip_img);
-		roi_img.copyTo(work_src);
+
 
 	}
 	return;
@@ -86,7 +95,7 @@ void extractFaceImage(std::string filepath, cv::UMat &clip_img) {
 		cv::Scalar s_min = cv::Scalar(H_MIN, S_MIN, V_MIN);
 		cv::Scalar s_max = cv::Scalar(H_MAX, S_MAX, V_MAX);
 		cv::cvtColor(work_src, hsv_img, cv::COLOR_BGR2HSV);
-		// HSV�F��Ԃɂ����锧�F�̌��o
+
 		cv::inRange(hsv_img, MIN_HSVCOLOR, MAX_HSVCOLOR, grayImg);
 		/*cv::inRange(hsv_img, MIN_BKCOLOR, MAX_BKCOLOR, grayImg2);
 		for (int y = 0; y < grayImg.rows; y++) {
@@ -107,7 +116,7 @@ void extractFaceImage(std::string filepath, cv::UMat &clip_img) {
 		//cv::cvtColor(work_src, grayImg, cv::COLOR_BGR2GRAY);
 		//cv::equalizeHist(grayImg, grayImg);
 		//cv::blur(grayImg, grayImg, cv::Size(8, 8));
-			//�@���b�N�A�b�v�e�[�u���쐬
+
 		int lut[256];
 
 		//double gm = 1.0 / 2.0; //gamma�̓K���}�l
@@ -116,7 +125,7 @@ void extractFaceImage(std::string filepath, cv::UMat &clip_img) {
 		//	lut[i] = pow(1.0 * i / 255, gm) * 255;
 		//}
 
-		// �o�͉摜�ɓK�p
+
 		//cv::LUT(grayImg, cv::Mat(cv::Size(256, 1), CV_8U, lut), grayImg);
 		//cv::GaussianBlur(grayImg, grayImg, cv::Size(11, 11), 3, 3);
 		//cv::Laplacian(grayImg, grayImg, CV_8U);
@@ -135,30 +144,30 @@ void extractFaceImage(std::string filepath, cv::UMat &clip_img) {
 			cv::polylines(work_src, *contour, true, cv::Scalar(0, 255, 0), 2);
 		}*/
 
-		//�֊s�̐�
+
 		int roiCnt = 0;
 
-		//�֊s�̃J�E���g   
+
 		int i = 0;
 
 		for (auto contour = contours.begin(); contour != contours.end(); contour++) {
 			std::vector< cv::Point > approx;
 
-			//�֊s�𒼐��ߎ�����
+
 			cv::approxPolyDP(cv::Mat(*contour), approx, 0.01 * cv::arcLength(*contour, true), true);
 
-			// �ߎ��̖ʐς����ȏ�Ȃ�擾
+
 			double area = cv::contourArea(approx);
 			std::cout << area << std::endl;
 			bool flag = false;
 			if (area > 20000.0) {
-				//�ň͂ޏꍇ            
+
 				cv::polylines(dst, approx, true, cv::Scalar(255, 0, 0, 0), 2);
 				std::stringstream sst;
 				//sst << "area : " << area;
 				//cv::putText(dst, sst.str(), approx[0], cv::FONT_HERSHEY_PLAIN, 1.0, cv::Scalar(0, 128, 0));
 
-				//�֊s�ɗאڂ����`�̎擾
+
 				cv::Rect brect = cv::boundingRect(cv::Mat(approx).reshape(2));
 				//cv::drawContours(work_src, contours, i, CV_RGB(255, 0, 0), 1);
 				//cv::UMat clip_img(work_src, brect);
@@ -187,11 +196,11 @@ void extractFaceImage(std::string filepath, cv::UMat &clip_img) {
 				//}
 
 				//cv::imshow("cliped", clip_img);
-				//���͉摜�ɕ\������ꍇ
+
 
 				roiCnt++;
 
-				//�O�̂��ߗ֊s���J�E���g
+
 				if (roiCnt == 99)
 				{
 					break;

@@ -3,6 +3,7 @@ WORKDIR /cheese
 
 COPY /src/face_detect/ ./
 # COPY CMakeLists.txt .
+
 RUN cmake . && make
 
 FROM golang:latest as builder
@@ -18,8 +19,9 @@ RUN go build -o app
 
 FROM golang:bullseye
 COPY --from=builder /workdir/app /app
-COPY --from=builder-cv /cheese/DisplayImage ./
+COPY --from=builder-cv /cheese/DisplayImage /DisplayImage
 COPY --from=builder-cv /usr/local/lib /usr/local/lib
 # テスト
-RUN ./DisplayImage
+# RUN mkdir /cheese/images -p
+# RUN ./DisplayImage
 ENTRYPOINT ["/app"]
