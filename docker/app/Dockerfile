@@ -1,4 +1,4 @@
-FROM notchman/opencv:latest as builder-cv
+FROM notchman/cheese:latest as builder-cv
 WORKDIR /cheese
 
 COPY /src/face_detect/ ./
@@ -17,7 +17,7 @@ ENV GOARCH=amd64
 RUN go build -o app
 
 FROM golang:bullseye
-
+WORKDIR /
 COPY --from=builder /workdir/app /app
 COPY --from=builder-cv /cheese/out/ /
 
@@ -29,4 +29,5 @@ COPY --from=builder-cv /usr/local/lib /usr/local/lib
 # テスト
 RUN mkdir /cheese/images -p
 # RUN ./DisplayImage
+
 ENTRYPOINT ["/app"]
