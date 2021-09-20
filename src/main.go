@@ -103,19 +103,7 @@ func main() {
 	})
 	router.GET("/download",func(c*gin.Context){
 		// OpenCVからの出力画像を取得
-		bytes, err := ioutil.ReadFile(RESULT_IMAGE)
-		if err != nil {
-			c.JSON(http.StatusBadGateway, gin.H{
-				"error": fmt.Sprintf("read file err: %s", err.Error()),
-			})
-			return
-		}
-
-		// 画像をbase64に変換してその結果をjsonとして返却
-		base64Encoding := base64.Encode(bytes)
-		c.JSON(http.StatusOK, gin.H{
-			"base64": fmt.Sprintf("%s", base64Encoding),
-		})
+		c.File(RESULT_IMAGE)
 	})
 	router.Run(":80")
 }
