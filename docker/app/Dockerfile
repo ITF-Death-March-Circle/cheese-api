@@ -1,15 +1,13 @@
 FROM notchman/opencv:latest as builder-cv
 WORKDIR /cheese
-COPY /src/face_detect/*.cpp .
-COPY /src/face_detect/*.hpp .
-COPY /src/face_detect/*.xml .
 
-COPY CMakeLists.txt .
+COPY /src/face_detect/ ./
+
 RUN cmake . && make
 
 FROM golang:latest as builder
 WORKDIR /workdir
-COPY src .
+COPY src ./
 RUN go mod tidy
 # Set Environment Variable
 ENV CGO_ENABLED=0
@@ -21,6 +19,8 @@ RUN go build -o app
 FROM golang:bullseye
 COPY --from=builder /workdir/app /app
 COPY --from=builder-cv /cheese/DisplayImage /DisplayImage
+COPY --from=builder-cv /cheese/*.xml /*.xml
+COPY --from=builder-cv /cheese/template.JPG /template.JPG
 COPY --from=builder-cv /usr/local/lib /usr/local/lib
 # テスト
 # RUN mkdir /cheese/images -p
