@@ -85,7 +85,7 @@ func main() {
 		}
 
 		// opencv製画像処理を実行
-		output, err := exec.Command("ls").CombinedOutput()
+		output, err := exec.Command("bash","-c","/DisplayImage").CombinedOutput()
     log.Printf("opencv output:\n%s :Error:\n%v\n", output, err)
 		if err != nil {
 			c.JSON(http.StatusBadGateway, gin.H{
