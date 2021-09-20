@@ -18,7 +18,7 @@ jobs:
         username: ${{ secrets.REGISTRY_USERNAME }}
         password: ${{ secrets.REGISTRY_PASSWORD }}
     - run: |
-        docker build . -t cheeseapi.azurecr.io/cheeseapi:${{ github.sha }}
+        docker build . -t cheeseapi.azurecr.io/cheeseapi:${{ github.sha }} -f "docker/app/Dockerfile"
         docker push cheeseapi.azurecr.io/cheeseapi:${{ github.sha }}
 
     - uses: azure/webapps-deploy@v2
