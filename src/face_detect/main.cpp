@@ -5,7 +5,7 @@
 constexpr int offset_width = 128;
 constexpr int offset_height = 64;
 
-//HSV�F�ϊ��p臒l
+//HSV?F????p?l
 constexpr int B_MIN = 80;
 constexpr int B_MAX = 200;
 constexpr int G_MIN = 80;
@@ -27,9 +27,9 @@ constexpr int  V_MIN = 60;
 
 void test() {
 	cv::VideoCapture cap(0);
-	cv::CascadeClassifier cascade; //�J�X�P�[�h���ފ�i�[�ꏊ
-	cascade.load("haarcascade_frontalface_alt.xml"); //���ʊ��񂪓����Ă���J�X�P�[�h
-	std::vector<cv::Rect> faces; //�֊s�����i�[�ꏊ
+	cv::CascadeClassifier cascade;
+	cascade.load("haarcascade_frontalface_alt.xml");
+	std::vector<cv::Rect> faces;
 	if (!cap.isOpened()) {
 		return;
 	}
@@ -50,18 +50,17 @@ void test() {
 
 		cv::GaussianBlur(frame, frame, cv::Size(5, 5), 0);
 
-		for (int i = 0; i < faces.size(); i++) //���o������̌�"faces.size()"�����[�v���s��
+		for (int i = 0; i < faces.size(); i++)
 		{
-			//�Z�[�t�N���b�s���O
 
 			int w_start = (faces[i].x - offset_width) > 0 ? (faces[i].x - offset_width) : 0;
 			int h_start = (faces[i].y - offset_height) > 0 ? (faces[i].y - offset_height) : 0;
 			int w_end = (faces[i].x + faces[i].width + offset_width) < frame.cols ? faces[i].x + faces[i].width + offset_width : frame.cols;
 			int h_end = (faces[i].y + faces[i].height + offset_height) < frame.rows ? faces[i].y + faces[i].height + offset_height : frame.rows;
-			//rectangle(frame, cv::Point(faces[i].x, faces[i].y), cv::Point(faces[i].x + faces[i].width, faces[i].y + faces[i].height), cv::Scalar(0, 0, 255), 3); //���o�������ԐF��`�ň͂�
-			rectangle(frame, cv::Point(w_start, h_start), cv::Point(w_end, h_end), cv::Scalar(0, 0, 255), 3); //���o�������ԐF��`�ň͂�
+			//rectangle(frame, cv::Point(faces[i].x, faces[i].y), cv::Point(faces[i].x + faces[i].width, faces[i].y + faces[i].height), cv::Scalar(0, 0, 255), 3); //???o????????F??`????
+			rectangle(frame, cv::Point(w_start, h_start), cv::Point(w_end, h_end), cv::Scalar(0, 0, 255), 3); //???o????????F??`????
 
-			//�N���b�s���O�摜�̐���
+			//?N???b?s???O???????
 			cv::UMat roi_img(dst, cv::Rect(cv::Point(w_start, h_start), cv::Point(w_end, h_end)));
 			cv::imshow("clip" + std::to_string(i), roi_img);
 			roi_img.copyTo(work_src);
@@ -92,7 +91,7 @@ void test() {
 			cv::Scalar s_min = cv::Scalar(H_MIN, S_MIN, V_MIN);
 			cv::Scalar s_max = cv::Scalar(H_MAX, S_MAX, V_MAX);
 			cv::cvtColor(work_src, hsv_img, cv::COLOR_BGR2HSV);
-			// HSV�F��Ԃɂ����锧�F�̌��o
+			// HSV?F??????????F????o
 			cv::inRange(hsv_img, MIN_HSVCOLOR, MAX_HSVCOLOR, grayImg);
 			/*cv::inRange(hsv_img, MIN_BKCOLOR, MAX_BKCOLOR, grayImg2);
 			for (int y = 0; y < grayImg.rows; y++) {
@@ -113,16 +112,15 @@ void test() {
 			//cv::cvtColor(work_src, grayImg, cv::COLOR_BGR2GRAY);
 			//cv::equalizeHist(grayImg, grayImg);
 			//cv::blur(grayImg, grayImg, cv::Size(8, 8));
-				//�@���b�N�A�b�v�e�[�u���쐬
+
 			int lut[256];
 
-			//double gm = 1.0 / 2.0; //gamma�̓K���}�l
+			//double gm = 1.0 / 2.0; //gamma??K???}?l
 			//for (int i = 0; i < 256; i++)
 			//{
 			//	lut[i] = pow(1.0 * i / 255, gm) * 255;
 			//}
 
-			// �o�͉摜�ɓK�p
 			//cv::LUT(grayImg, cv::Mat(cv::Size(256, 1), CV_8U, lut), grayImg);
 			//cv::GaussianBlur(grayImg, grayImg, cv::Size(11, 11), 3, 3);
 			//cv::Laplacian(grayImg, grayImg, CV_8U);
@@ -141,30 +139,24 @@ void test() {
 				cv::polylines(work_src, *contour, true, cv::Scalar(0, 255, 0), 2);
 			}*/
 
-			//�֊s�̐�
 			int roiCnt = 0;
 
-			//�֊s�̃J�E���g   
 			int i = 0;
 
 			for (auto contour = contours.begin(); contour != contours.end(); contour++) {
 				std::vector< cv::Point > approx;
 
-				//�֊s�𒼐��ߎ�����
 				cv::approxPolyDP(cv::Mat(*contour), approx, 0.01 * cv::arcLength(*contour, true), true);
 
-				// �ߎ��̖ʐς����ȏ�Ȃ�擾
 				double area = cv::contourArea(approx);
 				std::cout << area << std::endl;
 				bool flag = false;
 				if (area > 25000.0) {
-					//�ň͂ޏꍇ            
 					cv::polylines(dst, approx, true, cv::Scalar(255, 0, 0, 0), 2);
 					std::stringstream sst;
 					//sst << "area : " << area;
 					//cv::putText(dst, sst.str(), approx[0], cv::FONT_HERSHEY_PLAIN, 1.0, cv::Scalar(0, 128, 0));
 
-					//�֊s�ɗאڂ����`�̎擾
 					cv::Rect brect = cv::boundingRect(cv::Mat(approx).reshape(2));
 					cv::drawContours(work_src, contours, i, CV_RGB(255, 0, 0), 1);
 
@@ -193,13 +185,11 @@ void test() {
 					}
 
 					cv::imshow("cliped", clip_img);
-					//���͉摜�ɕ\������ꍇ
 
 
 
 					roiCnt++;
 
-					//�O�̂��ߗ֊s���J�E���g
 					if (roiCnt == 99)
 					{
 						break;
@@ -215,13 +205,12 @@ void test() {
 
 		}
 		const int key = cv::waitKey(1);
-		if (key == 'q'/*113*/)//q�{�^���������ꂽ�Ƃ�
+		if (key == 'q'/*113*/)
 		{
-			break;//while���[�v���甲����D
+			break;
 		}
-		else if (key == 's'/*115*/)//s�������ꂽ�Ƃ�
+		else if (key == 's'/*115*/)
 		{
-			//�t���[���摜��ۑ�����D
 			cap >> before_frame;
 		}
 	}
@@ -231,11 +220,11 @@ void test() {
 }
 cv::Mat PinP_point(const cv::UMat& srcImg, const cv::UMat& smallImg, const cv::Point2f p0, const cv::Point2f p1)
 {
-	//�w�i�摜�̍쐬
+
 	cv::Mat dstImg;
 	srcImg.copyTo(dstImg);
 
-	//�R�g�̑Ή��_���쐬
+
 	std::vector<cv::Point2f> src, dst;
 	src.push_back(cv::Point2f(0, 0));
 	src.push_back(cv::Point2f(smallImg.cols, 0));
@@ -245,17 +234,17 @@ cv::Mat PinP_point(const cv::UMat& srcImg, const cv::UMat& smallImg, const cv::P
 	dst.push_back(cv::Point2f(p1.x, p0.y));
 	dst.push_back(p1);
 
-	//�O�i�摜�̕ό`�s��
+
 	cv::Mat mat = cv::getAffineTransform(src, dst);
 
-	//�A�t�B���ϊ��̎��s
+
 	cv::warpAffine(smallImg, dstImg, mat, dstImg.size(), cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
 	return dstImg;
 }
 
 int main() {
 
-	//�f�B���N�g�����擾
+
 	std::string filename;
 	cv::UMat result_img;
 
@@ -266,21 +255,21 @@ int main() {
 	//cv::Mat test_img = cv::imread("images/test_img.png");
 	int width = 100;
 	int height = 100;
-	for (const std::filesystem::directory_entry& i : std::filesystem::directory_iterator("./images")) {
+	for (const std::filesystem::directory_entry& i : std::filesystem::directory_iterator("/cheese/images")) {
 
-		filename = "./images/" + i.path().filename().string();
+		filename = "/cheese/images/" + i.path().filename().string();
 
 		std::cout << i.path().filename().string() << std::endl;
 		//cv::Mat test_img = cv::imread(filename);
 		cv::UMat extract_img;
 
 		extractFaceImage(filename, extract_img);
-		if (extract_img.empty())continue;
-		//cv::imshow("tmp", extract_img);
-		//int wait = cv::waitKey(0);
+		if (extract_img.empty()) { std::cout << "skipped" << std::endl; continue; }
+		// cv::imshow("tmp", extract_img);
+		// int wait = cv::waitKey(0);
 		auto tmp = PinP_point(result_img, extract_img, cv::Point2f(100.0, 100.0), cv::Point2f(100.0 + (extract_img.cols / 1), 100.0 + (extract_img.rows / 1)));
 		tmp.copyTo(result_img);
 	}
-	cv::imwrite("result.png", result_img);
+	cv::imwrite("/cheese/result.png", result_img);
 	//test();
 }
