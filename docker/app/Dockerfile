@@ -1,13 +1,13 @@
 FROM notchman/opencv:latest as builder-cv
 WORKDIR /cheese
-COPY *.cpp ./
-COPY *.hpp ./
-COPY CMakeLists.txt .
+
+COPY /src/face_detect/ ./
+# COPY CMakeLists.txt .
 RUN cmake . && make
 
 FROM golang:latest as builder
 WORKDIR /workdir
-COPY src .
+COPY src ./
 RUN go mod tidy
 # Set Environment Variable
 ENV CGO_ENABLED=0
