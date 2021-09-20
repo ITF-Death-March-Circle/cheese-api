@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"path/filepath"
 
 	"main/base64"
@@ -12,6 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+const SAVE_DIR string = "/cheese/images/"
 const RESULT_IMAGE string = "/cheese/result.png"
 
 func main() {
@@ -28,10 +30,25 @@ func main() {
 			return
 		}
 
-		// ファイルを保存する
-		filename := filepath.Base(file.Filename)
-		filepath := "/tmp/images/"+filename
-		if err := c.SaveUploadedFile(file, filepath); err != nil {
+		// 保存用ディレクトリがあるかどうか判定する
+		f, err := os.Stat(SAVE_DIR);
+		if os.IsNotExist(err) || !f.IsDir() {
+			// なければディレクトリを作る
+			err := os.MkdirAll(SAVE_DIR, 0777);
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"error": fmt.Sprintf("mkdir save dir err: %s", err.Error()),
+				})
+				return
+			}
+		}
+
+		// 保存パスの生成
+		filepath := SAVE_DIR + filepath.Base(file.Filename)
+
+		// 保存パスにファイルを保存する
+		err = c.SaveUploadedFile(file, filepath);
+		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": fmt.Sprintf("upload file err: %s", err.Error()),
 			})
