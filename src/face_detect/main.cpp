@@ -287,6 +287,6 @@ int main()
 		tmp.copyTo(result_img);
 		++index_w;
 	}
-	cv::imwrite("/cheese/result.png", result_img);
+	cv::imwrite("/cheese/result.jpg", result_img);
 	//test();
 }
