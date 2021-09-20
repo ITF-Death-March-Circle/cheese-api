@@ -3,8 +3,10 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 
 	"main/base64"
@@ -78,6 +80,16 @@ func main() {
 		if err != nil {
 			c.JSON(http.StatusBadGateway, gin.H{
 				"error": fmt.Sprintf("get form err: %s", err.Error()),
+			})
+			return
+		}
+
+		// opencv製画像処理を実行
+		output, err := exec.Command("ls").CombinedOutput()
+    log.Printf("opencv output:\n%s :Error:\n%v\n", output, err)
+		if err != nil {
+			c.JSON(http.StatusBadGateway, gin.H{
+				"error": fmt.Sprintf("exec opencv err: %s", err.Error()),
 			})
 			return
 		}
