@@ -87,6 +87,12 @@ func main() {
 		// opencv製画像処理を実行
 		output, err := exec.Command("ls").CombinedOutput()
     log.Printf("opencv output:\n%s :Error:\n%v\n", output, err)
+		if err != nil {
+			c.JSON(http.StatusBadGateway, gin.H{
+				"error": fmt.Sprintf("exec opencv err: %s", err.Error()),
+			})
+			return
+		}
 
 		// ファイルをbase64に変換してその結果をjsonとして返却
 		base64Encoding := base64.Encode(bytes)
