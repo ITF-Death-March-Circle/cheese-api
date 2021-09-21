@@ -245,9 +245,14 @@ cv::Mat PinP_point(const cv::UMat &srcImg, const cv::UMat &smallImg, const cv::P
 	return dstImg;
 }
 
-int main()
+int main(int argc,char*argv[])
 {
-
+	std::string filePath;
+	if(argc < 2){
+		filePath = "/template.JPG";
+	}else{
+		filePath = argv[1];
+	}
 	std::string filename;
 	cv::UMat result_img;
 

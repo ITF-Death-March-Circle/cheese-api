@@ -141,7 +141,13 @@ func main() {
 		}
 
 		// opencv製画像処理を実行
-		output, err := exec.Command("bash", "-c", "/DisplayImage").CombinedOutput()
+		imageFileName, err := getFileName()
+		if err != nil {
+			log.Fatalln(err)
+			imageFileName = "template_1.JPG"
+		}
+
+		output, err := exec.Command("bash", "-c", "/DisplayImage", "/"+imageFileName).CombinedOutput()
 		log.Printf("opencv output:\n%s :Error:\n%v\n", output, err)
 		if err != nil {
 			c.JSON(http.StatusBadGateway, gin.H{
@@ -186,4 +192,37 @@ func main() {
 	})
 	go h.run()
 	router.Run(":80")
+}
+
+func getFileName() (fileName string, err error) {
+
+	value_1, err := count(VOTE_PATTERNS[0])
+	if err != nil {
+		return "", err
+	}
+
+	tmp := value_1
+	fileName = "template_1.JPG"
+
+	value_2, err := count(VOTE_PATTERNS[1])
+
+	if err != nil {
+		return
+	}
+
+	if tmp < value_2 {
+		tmp = value_2
+		fileName = "template_2.JPG"
+	}
+
+	value_3, err := count(VOTE_PATTERNS[2])
+
+	if err != nil {
+		return
+	}
+	if tmp < value_3 {
+		tmp = value_3
+		fileName = "template_3.JPG"
+	}
+	return
 }
