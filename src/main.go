@@ -97,7 +97,7 @@ func main() {
 		}
 
 		// 保存パスの生成
-		random, _ := MakeRandomStr(16)
+		random, _ := MakeRandomStr(24)
 		filepath := SAVE_DIR + random + ".jpg"
 		// 保存パスにファイルを保存する
 		// err = c.SaveUploadedFile(file, filepath);
