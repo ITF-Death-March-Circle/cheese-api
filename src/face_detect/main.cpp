@@ -26,7 +26,7 @@ constexpr int V_MIN = 60;
 //1箱の限界値を定める
 constexpr int img_height = 700;
 constexpr int img_width = 700;
-constexpr double resize_param = 4.3;
+constexpr double resize_param = 1;
 constexpr double resize_center = resize_param * 2;
 constexpr int offset_width = 150;
 constexpr int offset_height = 150;
@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 	std::string filePath;
 	if (argc < 2)
 	{
-		std::cout << "err"<<std::endl;
+		std::cout << "err" << std::endl;
 		filePath = "/template_1.jpg";
 	}
 	else
@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
 	}
 	std::string filename;
 	cv::UMat result_img;
-	
+
 	cv::Mat template_img = cv::imread(filePath);
 	template_img.copyTo(result_img);
 	//cv::Mat test_img = cv::imread("images/test_img.png");
@@ -117,5 +117,5 @@ int main(int argc, char *argv[])
 		tmp.copyTo(result_img);
 	}
 	cv::imwrite("/cheese/result.jpg", result_img);
-	std::cout << "success make file"<<std::endl;
+	std::cout << "success make file" << std::endl;
 }
