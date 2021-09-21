@@ -56,6 +56,13 @@ type MessageObject struct {
 	// RoomId  string `json:"room_id"`
 }
 
+type VoteResponse struct {
+	Action string `json:"action"`
+	Value  int    `json:"value"`
+	Text   string `json:"text"`
+	Count  int    `json:"count"`
+}
+
 type InitObject struct {
 	RoomId string `json:"room_id"`
 	UserId string `json:"user_id"`

@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"log"
-	"time"
 )
 
 const VOTE_BACKGROUND = "VOTE_BACKGROUND"
@@ -58,10 +57,11 @@ func handler(s []byte) []byte {
 
 func messageHandler(message string, room_id string, user_id string) ([]byte, error) {
 	// コールバックオブジェクトを作成
-	messageObject := MessageObject{
-		Action:  "NOTIFY_MESSAGE",
-		Time:    time.Now().String(),
-		Message: "success",
+	messageObject := VoteResponse{
+		Action: "RESULT_VOTE",
+		Text:   "success",
+		Count:  1,
+		Value:  2,
 	}
 	b, err := json.Marshal(messageObject)
 	if err != nil {
