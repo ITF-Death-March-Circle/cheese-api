@@ -147,7 +147,7 @@ func main() {
 			imageFileName = "template_1.jpg"
 		}
 
-		output, err := exec.Command("bash", "-c", "/DisplayImage", "/"+imageFileName).CombinedOutput()
+		output, err := exec.Command("bash", "-c", "/DisplayImage /"+imageFileName).CombinedOutput()
 		// log.Printf("opencv output:\n%s :Error:\n%v\n", output, err)
 		if err != nil {
 			c.JSON(http.StatusBadGateway, gin.H{

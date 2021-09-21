@@ -57,6 +57,7 @@ int main(int argc, char *argv[])
 	std::string filePath;
 	if (argc < 2)
 	{
+		std::cout << "err"<<std::endl;
 		filePath = "/template_1.jpg";
 	}
 	else
@@ -65,7 +66,7 @@ int main(int argc, char *argv[])
 	}
 	std::string filename;
 	cv::UMat result_img;
-
+	
 	cv::Mat template_img = cv::imread(filePath);
 	template_img.copyTo(result_img);
 	//cv::Mat test_img = cv::imread("images/test_img.png");
