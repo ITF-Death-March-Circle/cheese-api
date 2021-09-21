@@ -172,7 +172,7 @@ func main() {
 			"base64": fmt.Sprintf("%s", base64Encoding),
 		})
 	})
-	router.GET("/ws/", func(c *gin.Context) {
+	router.GET("/ws", func(c *gin.Context) {
 		// roomId := c.Param("roomId")
 		//roomdIdが存在しているかチェックする
 		// result, err := checkRoomId(roomId)
