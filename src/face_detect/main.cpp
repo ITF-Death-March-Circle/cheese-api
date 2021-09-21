@@ -4,7 +4,6 @@
 #include <random>
 #include "cv_algorithm.hpp"
 
-//HSV?F????p?l
 constexpr int B_MIN = 80;
 constexpr int B_MAX = 200;
 constexpr int G_MIN = 80;
@@ -25,9 +24,9 @@ constexpr int V_MIN = 60;
 #define MAX_BKCOLOR cv::Scalar(180, 255, 40)
 
 //1箱の限界値を定める
-constexpr int img_height = 500;
-constexpr int img_width = 500;
-constexpr double resize_param = 5.2;
+constexpr int img_height = 700;
+constexpr int img_width = 700;
+constexpr double resize_param = 4.3;
 constexpr double resize_center = resize_param * 2;
 constexpr int offset_width = 150;
 constexpr int offset_height = 150;
@@ -112,9 +111,10 @@ int main(int argc, char *argv[])
 
 		img_map.at(index_w).at(index_h) = false;
 
-		cv::circle(result_img, cv::Point2f(500.0 * index_w + (extract_img.cols / resize_center) + offset_width, 500.0 * index_h + (extract_img.rows / resize_center) + offset_height), 300, cv::Scalar(240, 240, 240), -1);
-		auto tmp = PinP_point(result_img, extract_img, cv::Point2f(500.0 * index_w + offset_width, 500.0 * index_h + offset_height), cv::Point2f(500.0 * index_w + (extract_img.cols / resize_param) + offset_width, 500.0 * index_h + (extract_img.rows / resize_param) + offset_height));
+		cv::circle(result_img, cv::Point2f(img_width * index_w + (extract_img.cols / resize_center) + offset_width, img_height * index_h + (extract_img.rows / resize_center) + offset_height), 400, cv::Scalar(240, 240, 240), -1);
+		auto tmp = PinP_point(result_img, extract_img, cv::Point2f(img_width * index_w + offset_width, img_height * index_h + offset_height), cv::Point2f(img_width * index_w + (extract_img.cols / resize_param) + offset_width, img_height * index_h + (extract_img.rows / resize_param) + offset_height));
 		tmp.copyTo(result_img);
 	}
 	cv::imwrite("/cheese/result.jpg", result_img);
+	std::cout << "success make file"<<std::endl;
 }
