@@ -2,16 +2,18 @@ package main
 
 import (
 	"fmt"
+	"image/jpeg"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"os/exec"
-	"path/filepath"
-	"time"
 
+	"crypto/rand"
+	"errors"
 	"main/base64"
 	"main/redis"
+	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -20,6 +22,27 @@ import (
 const SAVE_DIR string = "/cheese/images/"
 const RESULT_IMAGE string = "/cheese/result.jpg"
 
+type Request struct {
+	Image string `json:"image"`
+}
+
+func MakeRandomStr(digit uint32) (string, error) {
+	const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+	// 乱数を生成
+	b := make([]byte, digit)
+	if _, err := rand.Read(b); err != nil {
+		return "", errors.New("unexpected error...")
+	}
+
+	// letters からランダムに取り出して文字列を生成
+	var result string
+	for _, v := range b {
+		// index が letters の長さに収まるように調整
+		result += string(letters[int(v)%len(letters)])
+	}
+	return result, nil
+}
 func main() {
 	router := gin.Default()
 	// Set a lower memory limit for multipart forms (default is 32 MiB)
@@ -50,19 +73,21 @@ func main() {
 	}))
 	router.POST("/upload", func(c *gin.Context) {
 		// フォームデータからファイルを読み込む
-		file, err := c.FormFile("file")
+		data := Request{}
+		err := c.BindJSON(&data)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": fmt.Sprintf("get form err: %s", err.Error()),
 			})
 			return
 		}
+		image := base64.Decode(data.Image) //[]byte
 
 		// 保存用ディレクトリがあるかどうか判定する
-		f, err := os.Stat(SAVE_DIR);
+		f, err := os.Stat(SAVE_DIR)
 		if os.IsNotExist(err) || !f.IsDir() {
 			// なければディレクトリを作る
-			err := os.MkdirAll(SAVE_DIR, 0777);
+			err := os.MkdirAll(SAVE_DIR, 0777)
 			if err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{
 					"error": fmt.Sprintf("mkdir save dir err: %s", err.Error()),
@@ -72,17 +97,22 @@ func main() {
 		}
 
 		// 保存パスの生成
-		filepath := SAVE_DIR + filepath.Base(file.Filename)
-
+		random, _ := MakeRandomStr(10)
+		filepath := SAVE_DIR + random + ".jpg"
 		// 保存パスにファイルを保存する
-		err = c.SaveUploadedFile(file, filepath);
+		// err = c.SaveUploadedFile(file, filepath);
+		file, err := os.Create(filepath)
+		defer file.Close()
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": fmt.Sprintf("upload file err: %s", err.Error()),
 			})
 			return
 		}
-
+		qt := jpeg.Options{
+			Quality: 80,
+		}
+		err = jpeg.Encode(file, image, &qt)
 		// 保存パスをRedisに保存
 		err = redis.SetValue("filepath", filepath)
 		if err != nil {
@@ -111,7 +141,7 @@ func main() {
 		}
 
 		// opencv製画像処理を実行
-		output, err := exec.Command("bash","-c","/DisplayImage").CombinedOutput()
+		output, err := exec.Command("bash", "-c", "/DisplayImage").CombinedOutput()
 		log.Printf("opencv output:\n%s :Error:\n%v\n", output, err)
 		if err != nil {
 			c.JSON(http.StatusBadGateway, gin.H{
@@ -127,7 +157,7 @@ func main() {
 			"output": fmt.Sprintf("%s", output),
 		})
 	})
-	router.GET("/download",func(c*gin.Context){
+	router.GET("/download", func(c *gin.Context) {
 		// OpenCVからの出力画像を取得
 		bytes, err := ioutil.ReadFile(RESULT_IMAGE)
 		if err != nil {
