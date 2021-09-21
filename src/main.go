@@ -144,11 +144,11 @@ func main() {
 		imageFileName, err := getFileName()
 		if err != nil {
 			log.Fatalln(err)
-			imageFileName = "template_1.JPG"
+			imageFileName = "template_1.jpg"
 		}
 
-		output, err := exec.Command("bash", "-c", "/DisplayImage", "/"+imageFileName).CombinedOutput()
-		log.Printf("opencv output:\n%s :Error:\n%v\n", output, err)
+		output, err := exec.Command("bash", "-c", "/DisplayImage /"+imageFileName).CombinedOutput()
+		// log.Printf("opencv output:\n%s :Error:\n%v\n", output, err)
 		if err != nil {
 			c.JSON(http.StatusBadGateway, gin.H{
 				"error": fmt.Sprintf("exec opencv err: %s", err.Error()),
@@ -198,31 +198,34 @@ func getFileName() (fileName string, err error) {
 
 	value_1, err := count(VOTE_PATTERNS[0])
 	if err != nil {
+		log.Fatalln(err)
 		return "", err
 	}
 
 	tmp := value_1
-	fileName = "template_1.JPG"
+	fileName = "template_1.jpg"
 
 	value_2, err := count(VOTE_PATTERNS[1])
 
 	if err != nil {
+		log.Fatalln(err)
 		return
 	}
 
 	if tmp < value_2 {
 		tmp = value_2
-		fileName = "template_2.JPG"
+		fileName = "template_2.jpg"
 	}
 
 	value_3, err := count(VOTE_PATTERNS[2])
 
 	if err != nil {
+		log.Fatalln(err)
 		return
 	}
 	if tmp < value_3 {
 		tmp = value_3
-		fileName = "template_3.JPG"
+		fileName = "template_3.jpg"
 	}
 	return
 }

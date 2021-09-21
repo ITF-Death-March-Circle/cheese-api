@@ -3,7 +3,7 @@ WORKDIR /cheese
 
 COPY /src/face_detect/ ./
 RUN cmake . && make
-RUN mkdir out && mv DisplayImage ./out/ && mv *.JPG out/ && mv *.xml out/
+RUN mkdir out && mv DisplayImage ./out/ && mv *.jpg out/ && mv *.xml out/
 FROM golang:latest as builder
 WORKDIR /workdir
 COPY src ./
