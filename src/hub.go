@@ -1,5 +1,12 @@
 package main
 
+import (
+	"log"
+	"main/redis"
+
+	"github.com/pkg/errors"
+)
+
 var errorSocketResponse = []byte(`{"action":"ERROR_MESSAGE","status":"NG","error": true}`)
 
 var h = hub{
@@ -16,6 +23,10 @@ func (h *hub) run() {
 	for {
 		select {
 		case s := <-h.register:
+			err := redis.AddValue(COUNT_USER)
+			if err != nil {
+				log.Fatalln(errors.WithStack(err))
+			}
 			connections := h.rooms[s.room]
 			if connections == nil {
 				connections = make(map[*connection]bool)
@@ -23,6 +34,10 @@ func (h *hub) run() {
 			}
 			h.rooms[s.room][s.conn] = true
 		case s := <-h.unregister:
+			_, err := redis.DeclValue(COUNT_USER)
+			if err != nil {
+				log.Fatalln(errors.WithStack(err))
+			}
 			connections := h.rooms[s.room]
 			if connections != nil {
 				if _, ok := connections[s.conn]; ok {

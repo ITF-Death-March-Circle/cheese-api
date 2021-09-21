@@ -40,11 +40,8 @@ type ErrorObject struct {
 	Code string `json:"code"`
 }
 type SocketRequest struct {
-	Action  string `json:"action"`
-	Message string `json:"message"`
-	Name    string `json:"name"` //UserIdとする
-	RoomId  string `json:"room_id"`
-	UserId  string `json:"user_id"`
+	Action string `json:"action"`
+	Key    string `json:"key"`
 }
 
 type MessageObject struct {
