@@ -30,8 +30,8 @@ constexpr int V_MIN = 60;
 //1箱の限界値を定める
 constexpr int img_height = 500;
 constexpr int img_width = 500;
-constexpr double resize_param = 5.5;
-constexpr double resize_center = 5.5 * 2;
+constexpr double resize_param = 5.2;
+constexpr double resize_center = resize_param * 2;
 
 cv::Mat PinP_point(const cv::UMat &srcImg, const cv::UMat &smallImg, const cv::Point2f p0, const cv::Point2f p1)
 {
@@ -58,7 +58,7 @@ int main(int argc,char*argv[])
 {
 	std::string filePath;
 	if(argc < 2){
-		filePath = "/template_1.JPG";
+		filePath = "/template_1.jpg";
 	}else{
 		filePath = argv[1];
 	}

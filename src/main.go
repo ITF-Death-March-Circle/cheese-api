@@ -144,7 +144,7 @@ func main() {
 		imageFileName, err := getFileName()
 		if err != nil {
 			log.Fatalln(err)
-			imageFileName = "template_1.JPG"
+			imageFileName = "template_1.jpg"
 		}
 
 		output, err := exec.Command("bash", "-c", "/DisplayImage", "/"+imageFileName).CombinedOutput()
@@ -202,7 +202,7 @@ func getFileName() (fileName string, err error) {
 	}
 
 	tmp := value_1
-	fileName = "template_1.JPG"
+	fileName = "template_1.jpg"
 
 	value_2, err := count(VOTE_PATTERNS[1])
 
@@ -212,7 +212,7 @@ func getFileName() (fileName string, err error) {
 
 	if tmp < value_2 {
 		tmp = value_2
-		fileName = "template_2.JPG"
+		fileName = "template_2.jpg"
 	}
 
 	value_3, err := count(VOTE_PATTERNS[2])
@@ -222,7 +222,7 @@ func getFileName() (fileName string, err error) {
 	}
 	if tmp < value_3 {
 		tmp = value_3
-		fileName = "template_3.JPG"
+		fileName = "template_3.jpg"
 	}
 	return
 }
