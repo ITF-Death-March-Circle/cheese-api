@@ -4,9 +4,6 @@
 #include <random>
 #include "cv_algorithm.hpp"
 
-constexpr int offset_width = 128;
-constexpr int offset_height = 64;
-
 //HSV?F????p?l
 constexpr int B_MIN = 80;
 constexpr int B_MAX = 200;
