@@ -172,5 +172,18 @@ func main() {
 			"base64": fmt.Sprintf("%s", base64Encoding),
 		})
 	})
+	router.GET("/ws/", func(c *gin.Context) {
+		// roomId := c.Param("roomId")
+		//roomdIdが存在しているかチェックする
+		// result, err := checkRoomId(roomId)
+		// if err != nil || !result {
+		// 	c.JSON(401, gin.H{
+		// 		"message": "Error!",
+		// 	})
+		// } else {
+		serveWs(c.Writer, c.Request, "maid")
+		// }
+	})
+	go h.run()
 	router.Run(":80")
 }
