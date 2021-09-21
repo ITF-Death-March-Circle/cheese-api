@@ -165,6 +165,30 @@ func main() {
 	})
 	router.GET("/download", func(c *gin.Context) {
 		// OpenCVからの出力画像を取得
+		token := c.DefaultQuery("token", "")
+		if len(token) == 0 {
+			c.JSON(http.StatusBadGateway, gin.H{
+				"error": "Token does not set!",
+			})
+			return
+		}
+
+		env := os.Getenv("TOKEN")
+
+		if len(env) == 0 {
+			c.JSON(http.StatusBadGateway, gin.H{
+				"error": "Cannot read token",
+			})
+			return
+		}
+
+		if env != token {
+			c.JSON(http.StatusBadGateway, gin.H{
+				"error": "Token is not correctly",
+			})
+			return
+		}
+
 		bytes, err := ioutil.ReadFile(RESULT_IMAGE)
 		if err != nil {
 			c.JSON(http.StatusBadGateway, gin.H{
