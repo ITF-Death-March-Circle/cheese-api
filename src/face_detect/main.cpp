@@ -24,8 +24,8 @@ constexpr int V_MIN = 60;
 #define MAX_BKCOLOR cv::Scalar(180, 255, 40)
 
 //1箱の限界値を定める
-constexpr int img_height = 700;
-constexpr int img_width = 700;
+constexpr double img_width = 700;
+constexpr double img_height = 600;
 constexpr double resize_param = 1;
 constexpr double resize_center = resize_param * 2;
 constexpr int offset_width = 150;
@@ -94,14 +94,19 @@ int main(int argc, char *argv[])
 		filename = "/cheese/images/" + i.path().filename().string();
 
 		std::cout << i.path().filename().string() << std::endl;
+		cv::UMat _extract_img;
 		cv::UMat extract_img;
 
-		extractFaceImage(filename, extract_img);
-		if (extract_img.empty())
+		extractFaceImage(filename, _extract_img);
+		if (_extract_img.empty())
 		{
 			std::cout << "skipped" << std::endl;
 			continue;
 		}
+		//リサイズをかける
+
+		cv::resize(_extract_img, extract_img, cv::Size(), (0.85 * img_width) / _extract_img.cols, (0.85 * img_width) / _extract_img.cols);
+
 		//配置場所を決める
 
 		do
@@ -112,8 +117,8 @@ int main(int argc, char *argv[])
 
 		img_map.at(index_w).at(index_h) = false;
 
-		cv::circle(result_img, cv::Point2f(img_width * index_w + (extract_img.cols / resize_center) + offset_width, img_height * index_h + (extract_img.rows / resize_center) + offset_height), 400, cv::Scalar(240, 240, 240), -1);
-		auto tmp = PinP_point(result_img, extract_img, cv::Point2f(img_width * index_w + offset_width, img_height * index_h + offset_height), cv::Point2f(img_width * index_w + (extract_img.cols / resize_param) + offset_width, img_height * index_h + (extract_img.rows / resize_param) + offset_height));
+		cv::circle(result_img, cv::Point2f(img_width * index_w + (extract_img.cols / 2.0) + offset_width, img_height * index_h + (extract_img.rows / 2.0) + offset_height), 420, cv::Scalar(240, 240, 240), -1);
+		auto tmp = PinP_point(result_img, extract_img, cv::Point2f(img_width * index_w + offset_width, img_height * index_h + offset_height), cv::Point2f(img_width * index_w + extract_img.cols + offset_width, img_height * index_h + extract_img.rows + offset_height));
 		tmp.copyTo(result_img);
 	}
 	cv::imwrite("/cheese/result.jpg", result_img);
