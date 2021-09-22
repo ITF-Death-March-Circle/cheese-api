@@ -34,6 +34,11 @@ func (s subscription) readPump() {
 	c.ws.SetReadDeadline(time.Now().Add(pongWait))
 	c.ws.EnableWriteCompression(true)
 	c.ws.SetPongHandler(func(string) error { c.ws.SetReadDeadline(time.Now().Add(pongWait)); return nil })
+	first_m, err := getCurrentValue()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	h.broadcast <- message{first_m, s.room}
 	for {
 		_, msg, err := c.ws.ReadMessage()
 		//ここでハンドラーを噛ませば各種処理を行える
