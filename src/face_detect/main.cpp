@@ -24,12 +24,12 @@ constexpr int V_MIN = 60;
 #define MAX_BKCOLOR cv::Scalar(180, 255, 40)
 
 //1箱の限界値を定める
-constexpr double img_width = 750;
-constexpr double img_height = 750;
+constexpr double img_width = 730;
+constexpr double img_height = 730;
 constexpr double resize_param = 1;
 constexpr double resize_center = resize_param * 2;
-constexpr int offset_width = 150;
-constexpr int offset_height = 150;
+constexpr int offset_width = 180;
+constexpr int offset_height = 180;
 
 cv::Mat PinP_point(const cv::UMat &srcImg, const cv::UMat &smallImg, const cv::Point2f p0, const cv::Point2f p1)
 {
