@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
 		}
 		//リサイズをかける
 		//小倉駅のみスケールする
-		int scale = filePath == "/template_3.jpg" ? 0.7 : 1.0;
+		double scale = filePath == "/template_3.jpg" ? 0.7 : 1.0;
 		cv::resize(_extract_img, extract_img, cv::Size(), (0.85 * scale * img_width) / _extract_img.cols, (0.85 * scale * img_width) / _extract_img.cols);
 
 		//配置場所を決める
