@@ -104,8 +104,9 @@ int main(int argc, char *argv[])
 			continue;
 		}
 		//リサイズをかける
-
-		cv::resize(_extract_img, extract_img, cv::Size(), (0.85 * img_width) / _extract_img.cols, (0.85 * img_width) / _extract_img.cols);
+		//小倉駅のみスケールする
+		int scale = filePath == "/template_3.jpg" ? 0.7 : 1.0;
+		cv::resize(_extract_img, extract_img, cv::Size(), (0.85 * scale * img_width) / _extract_img.cols, (0.85 * scale * img_width) / _extract_img.cols);
 
 		//配置場所を決める
 
@@ -117,7 +118,7 @@ int main(int argc, char *argv[])
 
 		img_map.at(index_w).at(index_h) = false;
 
-		cv::circle(result_img, cv::Point2f(img_width * index_w + (extract_img.cols / 2.0) + offset_width, img_height * index_h + (extract_img.rows / 2.0) + offset_height), 450, cv::Scalar(240, 240, 240), -1);
+		cv::circle(result_img, cv::Point2f(img_width * index_w + (extract_img.cols / 2.0) + offset_width, img_height * index_h + (extract_img.rows / 2.0) + offset_height), 450 * (scale + 0.05), cv::Scalar(240, 240, 240), -1);
 		auto tmp = PinP_point(result_img, extract_img, cv::Point2f(img_width * index_w + offset_width, img_height * index_h + offset_height), cv::Point2f(img_width * index_w + extract_img.cols + offset_width, img_height * index_h + extract_img.rows + offset_height));
 		tmp.copyTo(result_img);
 	}
