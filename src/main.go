@@ -260,6 +260,17 @@ func main() {
 
 func getFileName() (fileName string, err error) {
 
+	user_count, err := count(COUNT_USER)
+	if err != nil {
+		log.Fatalln()
+		user_count = 0
+	}
+
+	if 16 < user_count && user_count%4 == 0 {
+		fileName = "template_special.jpg"
+		return
+	}
+
 	value_1, err := count(VOTE_PATTERNS[0])
 	if err != nil {
 		log.Fatalln(err)
