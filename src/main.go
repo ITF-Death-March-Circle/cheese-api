@@ -21,6 +21,7 @@ import (
 
 const SAVE_DIR string = "/cheese/images/"
 const RESULT_IMAGE string = "/cheese/result.jpg"
+const RESULT_MIN_IMAGE string = "/cheese/result_mini.jpg"
 
 type Request struct {
 	Image string `json:"image"`
@@ -190,6 +191,45 @@ func main() {
 		}
 
 		bytes, err := ioutil.ReadFile(RESULT_IMAGE)
+		if err != nil {
+			c.JSON(http.StatusBadGateway, gin.H{
+				"error": fmt.Sprintf("read file err: %s", err.Error()),
+			})
+			return
+		}
+		// 画像をbase64に変換してその結果をjsonとして返却
+		base64Encoding := base64.Encode(bytes)
+		c.JSON(http.StatusOK, gin.H{
+			"base64": fmt.Sprintf("%s", base64Encoding),
+		})
+	})
+	router.GET("/download_preview", func(c *gin.Context) {
+		// OpenCVからの出力画像を取得
+		token := c.DefaultQuery("token", "")
+		if len(token) == 0 {
+			c.JSON(http.StatusBadGateway, gin.H{
+				"error": "Token does not set!",
+			})
+			return
+		}
+
+		env := os.Getenv("TOKEN")
+
+		if len(env) == 0 {
+			c.JSON(http.StatusBadGateway, gin.H{
+				"error": "Cannot read token",
+			})
+			return
+		}
+
+		if env != token {
+			c.JSON(http.StatusBadGateway, gin.H{
+				"error": "Token is not correctly",
+			})
+			return
+		}
+
+		bytes, err := ioutil.ReadFile(RESULT_MIN_IMAGE)
 		if err != nil {
 			c.JSON(http.StatusBadGateway, gin.H{
 				"error": fmt.Sprintf("read file err: %s", err.Error()),

@@ -24,8 +24,8 @@ constexpr int V_MIN = 60;
 #define MAX_BKCOLOR cv::Scalar(180, 255, 40)
 
 //1箱の限界値を定める
-constexpr double img_width = 700;
-constexpr double img_height = 600;
+constexpr double img_width = 750;
+constexpr double img_height = 750;
 constexpr double resize_param = 1;
 constexpr double resize_center = resize_param * 2;
 constexpr int offset_width = 150;
@@ -117,10 +117,15 @@ int main(int argc, char *argv[])
 
 		img_map.at(index_w).at(index_h) = false;
 
-		cv::circle(result_img, cv::Point2f(img_width * index_w + (extract_img.cols / 2.0) + offset_width, img_height * index_h + (extract_img.rows / 2.0) + offset_height), 420, cv::Scalar(240, 240, 240), -1);
+		cv::circle(result_img, cv::Point2f(img_width * index_w + (extract_img.cols / 2.0) + offset_width, img_height * index_h + (extract_img.rows / 2.0) + offset_height), 450, cv::Scalar(240, 240, 240), -1);
 		auto tmp = PinP_point(result_img, extract_img, cv::Point2f(img_width * index_w + offset_width, img_height * index_h + offset_height), cv::Point2f(img_width * index_w + extract_img.cols + offset_width, img_height * index_h + extract_img.rows + offset_height));
 		tmp.copyTo(result_img);
 	}
 	cv::imwrite("/cheese/result.jpg", result_img);
+	//プレビュー用軽量化画像の生成
+	cv::UMat mini_result;
+	cv::resize(result_img, mini_result, cv::Size(), 0.5, 0.5);
+	cv::imwrite("/cheese/result_mini.jpg", mini_result);
+
 	std::cout << "success make file" << std::endl;
 }
